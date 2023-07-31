@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create QR Code and Barcode</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 250px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <form id="form">
+        <label for="nomor_resi">Nomor Resi:</label>
+        <input type="text" id="nomor_resi" name="nomor_resi" required>
+        
+        <label for="nama_penerima">Nama Penerima:</label>
+        <input type="text" id="nama_penerima" name="nama_penerima" required>
+        
+        <label for="cod">COD (Jika tidak ada, isi dengan 0):</label>
+        <input type="number" id="cod" name="cod" value="0" required>
+        
+        <label for="district">District:</label>
+        <select id="district" name="district">
+            <option value="">Pilih District</option>
+            <option value="Banjarbaru Utara">Banjarbaru Utara</option>
+            <option value="Banjarbaru Selatan">Banjarbaru Selatan</option>
+            <option value="Cempaka">Cempaka</option>
+            <option value="Landasan Ulin">Landasan Ulin</option>
+            <option value="Liang Anggang">Liang Anggang</option>
+        </select>
+        
+        <label for="alamat">Alamat:</label>
+        <textarea id="alamat" name="alamat" rows="4" cols="50" required></textarea>
+        
+        <label for="agent_shopee">
+            <input type="checkbox" id="agent_shopee" name="agent_shopee">
+            Agent Shopee
+        </label>
+        
+        <button type="submit">Generate</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        function generateQRCodeUrl(data) {
+            return `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(data)}&size=200x200`;
+        }
+
+        
+        document.getElementById('form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const nomorResi = document.getElementById('nomor_resi').value;
+            const namaPenerima = document.getElementById('nama_penerima').value;
+            const cod = document.getElementById('cod').value;
+            const district = document.getElementById('district').value;
+            const alamat = document.getElementById('alamat').value;
+            const agentShopee = document.getElementById('agent_shopee').checked;
+
+            if (!nomorResi) {
+                alert('Data nomor resi tidak ditemukan dalam request.');
+                return;
+            }
+
+            const qrCodeUrl = generateQRCodeUrl(nomorResi);
+
+            // Redirect ke halaman /result dengan query string sesuai isi form
+            const redirectUrl = `result.html?nomor_resi=${encodeURIComponent(nomorResi)}&nama_penerima=${encodeURIComponent(namaPenerima)}&cod=${encodeURIComponent(cod)}&district=${encodeURIComponent(district)}&alamat=${encodeURIComponent(alamat)}&agent_shopee=${encodeURIComponent(agentShopee)}&qrcode=${encodeURIComponent(qrCodeUrl)}`;
+            window.location.href = redirectUrl;
+        });
+    </script>
+</body>
+</html>

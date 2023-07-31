@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resi Pengiriman</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .resi-container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            width: 400px;
+            margin: 0 auto;
+            margin-bottom: 10px;
+        }
+
+        .qr-code {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .qr-code img {
+            max-width: 100px; /* Batasi ukuran QR code menjadi maksimum 100px */
+        }
+
+        .barcode {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .recipient {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .type {
+            font-size: 14px;
+            margin-bottom: 5px;
+            font-weight: lighter; /* Gaya cetak ringan (light) */
+        }
+
+        .divider {
+            margin: 10px 0;
+        }
+
+        .address {
+            font-size: 14px;
+        }
+
+        .bold-text {
+            font-weight: bold; /* Gaya cetak tebal */
+        }
+
+        .info-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-left {
+            flex: 1;
+        }
+
+        .info-right {
+            flex: 1;
+            text-align: right;
+        }
+
+        /* Tabel */
+        .resi-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .resi-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+
+
+
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+    <div class="resi-container" id="resi-container">
+        <div class="barcode">
+            <!-- Ganti URL di bawah dengan link barcode yang sesuai -->
+            <div class="type"><span id="agent_shopee"></span></div>
+            <img src="" id="barcode">
+        </div>
+        <hr>
+        <div class="info-container">
+            <div class="info-left">
+                <div class="address"><span class="bold-text">Penerima:</span> <span id="nama_penerima"></span></div>
+                <div class="address"><span class="bold-text">COD:</span> <span id="cod"></span></div>
+            </div>
+            <div class="info-right">
+                <!-- Ganti URL di bawah dengan link QR code yang sesuai -->
+                <div class="qr-code">
+                    <img src="" alt="QR Code" id="qrcode">
+                </div>
+            </div>
+        </div>
+        <div class="divider"></div> <!-- Mengganti garis horizontal dengan elemen pemisah -->
+        <div class="address"><span class="bold-text">Nomor Resi:</span> <span id="nomor_resi"></span></div>
+        <!-- Tabel Provinsi dan Distrik -->
+        <table class="resi-table">
+            <tr>
+                <td class="bold-text">Kalimantan Selatan</td>
+                <td><span id="district"></span></td>
+            </tr>
+        </table>
+        <div class="divider"></div> <!-- Mengganti garis horizontal dengan elemen pemisah -->
+        <div class="address"><span class="bold-text">Alamat:</span> <span id="alamat"></span></div>
+        <!-- Tambahkan informasi lain seperti tanggal pengiriman, jenis pengiriman, dll. -->
+    </div>
+
+    <div style="display: flex; justify-content: center;">
+    <button onclick="capture()" style="padding: 10px 20px; font-size: 16px; margin-right: 10px;">Download</button>
+    <a href="/" style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer; box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.3);">
+        Back
+    </a>
+</div>
+
+
+    <div>
+        <img src="" alt="" id="result">
+    </div>
+
+    <script>
+            function getQueryParameter(param) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(param);
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const nomorResi = getQueryParameter("nomor_resi");
+                const namaPenerima = getQueryParameter("nama_penerima");
+                const cod = getQueryParameter("cod");
+                const district = getQueryParameter("district");
+                const alamat = getQueryParameter("alamat");
+                const agentShopee = getQueryParameter("agent_shopee");
+                const qrCodeUrl = getQueryParameter("qrcode");
+                const barcodeUrl = getQueryParameter("barcode");
+
+                document.getElementById("nomor_resi").textContent = nomorResi;
+                document.getElementById("nama_penerima").textContent = namaPenerima;
+                document.getElementById("cod").textContent = cod;
+                document.getElementById("district").textContent = district;
+                document.getElementById("alamat").textContent = alamat;
+
+                // Update the image sources for QR code and barcode
+                document.getElementById("qrcode").src = qrCodeUrl;
+                document.getElementById("barcode").src = barcodeUrl;
+
+                // Set "Agent Shopee" checkbox checked state
+                if (agentShopee === "true") {
+                    document.getElementById("agent_shopee").textContent = "Agent Shopee";
+                } else {
+                    document.getElementById("agent_shopee").textContent = "";
+                }
+
+                JsBarcode("#barcode", nomorResi, {
+                format: "CODE128",
+                displayValue: true,
+                fontSize: 12,
+                lineColor: "#000",
+                width: 2,
+                height: 60,
+                margin: 10,
+            }); 
+
+            });
+
+        </script>
+
+        <script src="./html2canvas.min.js"></script>
+<script>
+    function capture() {
+        html2canvas(document.getElementById("resi-container"), {
+            letterRendering: 1,
+            allowTaint: true,
+            useCORS: true,
+        })
+        .then(function (canvas) {
+            // Convert the canvas to a data URL
+            var imageDataURL = canvas.toDataURL("image/png", 0.5);
+
+            // Get the current "Nomor Resi" value
+            var nomorResi = document.getElementById("nomor_resi").textContent;
+
+            // Create a temporary link element to trigger the download
+            var downloadLink = document.createElement("a");
+            downloadLink.href = imageDataURL;
+            downloadLink.download = nomorResi + ".png"; // Use the "Nomor Resi" as the file name
+            downloadLink.style.display = "none";
+
+            // Append the link to the body and trigger the download
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+
+            // Clean up - remove the temporary link
+            document.body.removeChild(downloadLink);
+        })
+        .catch((e) => {
+            alert(e);
+        });
+    }
+
+</script>
+
+
+
+
+
+</body>
+</html>
