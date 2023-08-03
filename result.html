@@ -181,42 +181,60 @@
 
         <script src="./html2canvas.min.js"></script>
 <script>
-    function capture() {
-        html2canvas(document.getElementById("resi-container"), {
-            letterRendering: 1,
-            allowTaint: true,
-            useCORS: true,
-        })
-        .then(function (canvas) {
-            // Convert the canvas to a data URL
-            var imageDataURL = canvas.toDataURL("image/png", 0.5);
+function uploadImageToImgBB(imageDataURL, nomorResi) {
+    const apiKey = "d94a19dd77276c80eeaa8d625abf6391";
+    const uploadURL = "https://api.imgbb.com/1/upload";
+    const base64Image = imageDataURL.replace(/^data:image\/(png|jpg);base64,/, "");
 
-            // Get the current "Nomor Resi" value
-            var nomorResi = document.getElementById("nomor_resi").textContent;
+    const formData = new FormData();
+    formData.append("key", apiKey);
+    formData.append("name", nomorResi);
+    formData.append("image", base64Image);
 
-            // Create a temporary link element to trigger the download
-            var downloadLink = document.createElement("a");
-            downloadLink.href = imageDataURL;
-            downloadLink.download = nomorResi + ".png"; // Use the "Nomor Resi" as the file name
-            downloadLink.style.display = "none";
+    return fetch(uploadURL, {
+        method: "POST",
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.data && data.data.url) {
+            return data.data.url;
+        } else {
+            throw new Error("Failed to upload image to ImgBB");
+        }
+    });
+}
 
-            // Append the link to the body and trigger the download
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
+function capture() {
+    html2canvas(document.getElementById("resi-container"), {
+        letterRendering: 1,
+        allowTaint: true,
+        useCORS: true,
+    })
+    .then(function (canvas) {
+        var imageDataURL = canvas.toDataURL("image/png", 0.5);
+        var nomorResi = document.getElementById("nomor_resi").textContent;
 
-            // Clean up - remove the temporary link
-            document.body.removeChild(downloadLink);
-        })
-        .catch((e) => {
-            alert(e);
-        });
-    }
+        // Create a temporary link element to trigger the download
+        var downloadLink = document.createElement("a");
+        downloadLink.href = imageDataURL;
+        downloadLink.download = nomorResi + ".png";
+        downloadLink.style.display = "none";
+
+        // Append the link to the body and trigger the download
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        // Clean up - remove the temporary link
+        document.body.removeChild(downloadLink);
+        uploadImageToImgBB(imageDataURL, nomorResi);
+    })
+    .catch((e) => {
+        alert(e);
+    });
+}
+
 
 </script>
-
-
-
-
 
 </body>
 </html>
